@@ -20,4 +20,8 @@ samples, guidance on mobile development, and a full API reference.
 
  * [The source tutorial](https://codelabs.developers.google.com/codelabs/flutter-codelab-first#0)
  * https://codelabs.developers.google.com/?text=flutter
+
+# Note:
+
+Currently up to [here](https://youtu.be/8sAyPDLorek?t=3312)
  
