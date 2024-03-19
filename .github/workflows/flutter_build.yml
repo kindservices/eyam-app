@@ -1,0 +1,44 @@
+name: Web and iOS Build
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        platform: [web, ios]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0' # Replace with your Flutter version
+
+    - name: Get Dependencies
+      run: flutter pub get
+
+    - name: Build Web
+      if: matrix.platform == 'web'
+      run: flutter build web
+    - name: Upload Web Artifacts
+      if: matrix.platform == 'web'
+      uses: actions/upload-artifact@v2
+      with:
+        name: web-artifacts
+        path: build/web
+
+    - name: Build iOS
+      if: matrix.platform == 'ios'
+      run: flutter build ios --release --no-codesign
+    - name: Upload iOS Artifacts
+      if: matrix.platform == 'ios'
+      uses: actions/upload-artifact@v2
+      with:
+        name: ios-artifacts
+        path: build/ios/iphoneos

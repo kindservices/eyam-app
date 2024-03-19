@@ -1,0 +1,19 @@
+name: Firebase Storage Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+
+    - name: Install Dependencies
+      working-directory: functions
+      run: npm install
+
+    - name: Run Tests
+      run: firebase emulators:exec --project=doesntmatter --import=functions/.seed "cd functions; npm test"

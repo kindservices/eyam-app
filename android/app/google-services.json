@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "634048418553",
+    "project_id": "eyam-app",
+    "storage_bucket": "eyam-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634048418553:android:60b189cd8aad4cabbac828",
+        "android_client_info": {
+          "package_name": "org.eyam.eyam_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyS0WoNT-R3sIySBLjFfPiG1xY9RAefjc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

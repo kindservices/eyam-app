@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+
+  // these initial rules were taken from https://firebase.google.com/codelabs/firebase-rules#10
+  //
+  match /databases/{database}/documents {
+
+    // Returns true if user is post author or a moderator
+    function isAuthorOrModerator(post, auth) {
+      let isAuthor = auth.uid == post.authorUID;
+      let isModerator = auth.token.isModerator == true;
+      return isAuthor || isModerator;
+    }
+
+    function titleIsUnder50Chars(post) {
+      return post.title.size() < 50;
+    }
+
+    // Draft blog posts
+    match /drafts/{draftID} {
+      // `authorUID`: string, required
+      // `content`: string, optional
+      // `createdAt`: timestamp, required
+      // `title`: string, < 50 characters, required
+      // `url`: string, optional
+
+      allow create: if
+        // User is author
+        request.auth.uid == request.resource.data.authorUID &&
+        // Must include title, author, and createdAt fields
+        request.resource.data.keys().hasAll([
+          "authorUID",
+          "createdAt",
+          "title"
+        ]) &&
+        titleIsUnder50Chars(request.resource.data);
+
+      allow update: if
+        // User is author
+        resource.data.authorUID == request.auth.uid &&
+        // `authorUID` and `createdAt` are unchanged
+        request.resource.data.diff(resource.data).unchangedKeys().hasAll([
+          "authorUID",
+          "createdAt"
+          ]) &&
+        titleIsUnder50Chars(request.resource.data);
+
+      // Can be read or deleted by author or moderator
+      allow read, delete: if isAuthorOrModerator(resource.data, request.auth);
+    }
+
+    // Published blog posts are denormalized from drafts
+    match /published/{postID} {
+      // `authorUID`: string, required
+      // `content`: string, required
+      // `publishedAt`: timestamp, required
+      // `title`: string, < 50 characters, required
+      // `url`: string, required
+      // `visible`: boolean, required
+
+      // Can be read by everyone
+      allow read: if true;
+
+      // Published posts are created only via functions, never by users
+      // No hard deletes; soft deletes update `visible` field.
+      allow create, delete: if false;
+
+      allow update: if
+        isAuthorOrModerator(resource.data, request.auth) &&
+        // Immutable fields are unchanged
+        request.resource.data.diff(resource.data).unchangedKeys().hasAll([
+          "authorUID",
+          "publishedAt",
+          "url"
+        ]) &&
+        // Required fields are present
+        request.resource.data.keys().hasAll([
+          "content",
+          "title",
+          "visible"
+        ]) &&
+        titleIsUnder50Chars(request.resource.data);
+    }
+
+    match /published/{postID}/comments/{commentID} {
+      // `authorUID`: string, required
+      // `createdAt`: timestamp, required
+      // `editedAt`: timestamp, optional
+      // `comment`: string, < 500 characters, required
+
+      // Must have permanent account to read comments
+      allow read: if !(request.auth.token.firebase.sign_in_provider == "anonymous");
+
+      allow create: if
+        // User has verified email
+        request.auth.token.email_verified == true &&
+        // Comment is under 500 characters
+        request.resource.data.comment.size() < 500 &&
+        // UID is not on the block list
+        !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+
+      allow update: if
+        // is author
+        request.auth.uid == resource.data.authorUID &&
+        // within an hour of comment creation
+        (request.time - resource.data.createdAt) < duration.value(1, 'h');
+
+      allow delete: if
+        // is comment author or moderator
+        isAuthorOrModerator(resource.data, request.auth) ||
+        // is blog post author
+        request.auth.uid == get(/databases/$(database)/documents/published/$(postID)).data.authorUID;
+    }
+  }
+}
