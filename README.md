@@ -67,6 +67,7 @@ and then check [here](http://127.0.0.1:8089/firestore)
  
 #### Tutorials
  * [codelab](https://firebase.google.com/codelabs/firebase-get-to-know-flutter#0)
+ * [Firestore Codelab](https://firebase.google.com/codelabs/firestore-web#0)
 
 #### Emulator
  * [emulator-suite](https://firebase.google.com/docs/emulator-suite)
