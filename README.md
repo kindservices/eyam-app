@@ -2,7 +2,18 @@
 
 The Eyam App!
 
-## TODO:
+## Next:
+
+0. fix build
+1. Create an 'add section' button
+2. Create a page edit widget
+3. add the page edit to the new section, so that each section has a landing page
+
+### Backlog: 
+ * only add 'add section' for authorised users
+ * visibility / access controls for sections
+--
+
 
 ### Firebase Storage
  * create my own test for my own .seed data (e.g. just a simple 'foo' collection and 'moderator' collection)
@@ -11,7 +22,7 @@ The Eyam App!
  * be able to create a new 'section'
    have a list of RBAC for that section (visibility)
  * be able to create new pages within a secion
-
+x
 ### Milestones
 
  * Get firebase set up
