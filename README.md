@@ -22,7 +22,7 @@ The Eyam App!
  * be able to create a new 'section'
    have a list of RBAC for that section (visibility)
  * be able to create new pages within a secion
-x
+
 ### Milestones
 
  * Get firebase set up
