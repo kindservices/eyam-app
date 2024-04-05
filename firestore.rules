@@ -16,6 +16,12 @@ service cloud.firestore {
       return post.title.size() < 50;
     }
 
+    // sections
+    match /sections/{document=**} {
+      // allow read, write: if request.auth != null;
+      allow read, write: if true;
+    }
+
     // Draft blog posts
     match /drafts/{draftID} {
       // `authorUID`: string, required

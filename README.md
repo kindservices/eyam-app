@@ -2,7 +2,20 @@
 
 The Eyam App!
 
-## TODO:
+## Next:
+
+1. list the sections in the navigation window
+2. add a 'delete' button for the section
+3. add an 'add page' button
+2. Create a page edit widget
+3. add the page edit to the new section, so that each section has a landing page
+
+### Backlog: 
+ * only add 'add section' for authorised users
+ * visibility / access controls for sections
+ * don't save duplicate sections
+--
+
 
 ### Firebase Storage
  * create my own test for my own .seed data (e.g. just a simple 'foo' collection and 'moderator' collection)
@@ -56,6 +69,7 @@ and then check [here](http://127.0.0.1:8089/firestore)
  
 #### Tutorials
  * [codelab](https://firebase.google.com/codelabs/firebase-get-to-know-flutter#0)
+ * [Firestore Codelab](https://firebase.google.com/codelabs/firestore-web#0)
 
 #### Emulator
  * [emulator-suite](https://firebase.google.com/docs/emulator-suite)
