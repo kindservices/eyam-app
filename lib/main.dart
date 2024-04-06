@@ -1,14 +1,17 @@
 import 'package:english_words/english_words.dart';
+import 'package:eyam_app/app/section/add_section_page.dart';
 import 'package:eyam_app/app_state.dart';
 import 'package:eyam_app/generator_page.dart';
+import 'package:eyam_app/init.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() async {
+  await Init.init();
+
   runApp(ChangeNotifierProvider(
     create: (context) => ApplicationState(),
     builder: ((context, child) => const MyApp()),
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'Eyam App',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -68,6 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
         page = GeneratorPage();
       case 1:
         page = FavoritesPage();
+      case 2:
+        page = AddSectionPage();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -87,6 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   NavigationRailDestination(
                     icon: Icon(Icons.favorite),
                     label: Text('Favorites'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.add_circle),
+                    label: Text('Add Section'),
                   ),
                 ],
                 selectedIndex: selectedIndex,
