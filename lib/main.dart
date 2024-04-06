@@ -1,13 +1,12 @@
 import 'package:english_words/english_words.dart';
 import 'package:eyam_app/app/section/add_section_page.dart';
+import 'package:eyam_app/app/section/section.dart';
+import 'package:eyam_app/app/section/section_page.dart';
 import 'package:eyam_app/app_state.dart';
 import 'package:eyam_app/generator_page.dart';
 import 'package:eyam_app/init.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 
 void main() async {
   await Init.init();
@@ -63,6 +62,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+  var selectedSection = "";
+
   @override
   Widget build(BuildContext context) {
     Widget page;
@@ -74,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case 2:
         page = AddSectionPage();
       default:
-        throw UnimplementedError('no widget for $selectedIndex');
+        page = SelectedSection(sectionName: selectedSection);
     }
 
     return LayoutBuilder(builder: (context, constraints) {
@@ -82,30 +83,18 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Row(
           children: [
             SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.add_circle),
-                    label: Text('Add Section'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
-              ),
-            ),
+                child: FutureBuilder(
+              future: Section.getVisibleSections(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Show loading indicator while waiting for data
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return navigationRail(constraints, snapshot.data!.toList());
+                }
+              },
+            )),
             Expanded(
               child: Container(
                   color: Theme.of(context).colorScheme.primaryContainer,
@@ -115,6 +104,43 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     });
+  }
+
+  NavigationRail navigationRail(
+      BoxConstraints constraints, List<String> sections) {
+    return NavigationRail(
+      extended: constraints.maxWidth >= 600,
+      destinations: [
+        NavigationRailDestination(
+          icon: Icon(Icons.home),
+          label: Text('Home'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.favorite),
+          label: Text('Favorites'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.add_circle),
+          label: Text('Add Section'),
+        ),
+        // code to insert more NavigationRailDestination from sections  list
+        ...sections
+            .map((section) => NavigationRailDestination(
+                  icon: Icon(Icons.category),
+                  label: Text(section),
+                ))
+            .toList(),
+      ],
+      selectedIndex: selectedIndex,
+      onDestinationSelected: (value) {
+        setState(() {
+          selectedIndex = value;
+          if (selectedIndex > 2) {
+            selectedSection = sections[selectedIndex - 3];
+          }
+        });
+      },
+    );
   }
 }
 

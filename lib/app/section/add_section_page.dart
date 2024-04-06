@@ -1,8 +1,6 @@
-import 'package:eyam_app/main.dart';
+import 'package:eyam_app/app/section/section.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddSectionPage extends StatefulWidget {
@@ -28,19 +26,13 @@ class _AddSectionPageState extends State<AddSectionPage> {
         saving = true;
       });
 
-      DocumentReference<Map<String, dynamic>> result =
-          await FirebaseFirestore.instance.collection('sections').add({
-        'name': nameController.text,
-        'visibility': _visibility,
-      });
+      await Section.save(nameController.text, _visibility);
 
       setState(() {
         saving = false; // Stop saving
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Created ${nameController.text} section ${result.id}!')),
+        SnackBar(content: Text('Created ${nameController.text}')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +92,7 @@ class _AddSectionPageState extends State<AddSectionPage> {
               child: Row(
                 children: [
                   ElevatedButton(
-                    onPressed: _saveData,
+                    onPressed: saving ? null : _saveData,
                     child: Text('Save'),
                   ),
                   SizedBox(width: 8),
