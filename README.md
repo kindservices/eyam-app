@@ -4,9 +4,10 @@ The Eyam App!
 
 ## Next:
 
-1. list the sections in the navigation window
+1. allow the user to choose an icon for the section
+* move 'add section' to the bottom
 2. add a 'delete' button for the section
-3. add an 'add page' button
+3. add an 'add page' button under each section
 2. Create a page edit widget
 3. add the page edit to the new section, so that each section has a landing page
 
