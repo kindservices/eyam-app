@@ -1,7 +1,10 @@
 import 'package:eyam_app/app/section/section.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 class AddSectionPage extends StatefulWidget {
   @override
@@ -11,12 +14,16 @@ class AddSectionPage extends StatefulWidget {
 class _AddSectionPageState extends State<AddSectionPage> {
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
+  final emojiController = TextEditingController();
   String _visibility = 'default';
   bool saving = false;
+
+  Emoji? icon;
 
   @override
   void dispose() {
     nameController.dispose();
+    emojiController.dispose();
     super.dispose();
   }
 
@@ -41,6 +48,47 @@ class _AddSectionPageState extends State<AddSectionPage> {
     }
   }
 
+  Widget emojiPicker(BuildContext context) {
+    return Row(
+      children: [
+        // CupertinoActionSheetAction(
+        //   child: Text('Close'),
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //   },
+        // ),
+        EmojiPicker(
+          onEmojiSelected: (Category? category, Emoji emoji) {
+            setState(() {
+              icon = emoji;
+            });
+            Navigator.pop(context);
+          },
+          onBackspacePressed: null,
+          textEditingController:
+              emojiController, // pass here the same [TextEditingController] that is connected to your input field, usually a [TextFormField]
+          config: Config(
+            height: 256,
+            // bgColor: const Color(0xFFF2F2F2),
+            checkPlatformCompatibility: true,
+            emojiViewConfig: EmojiViewConfig(
+              // Issue: https://github.com/flutter/flutter/issues/28894
+              emojiSizeMax: 28 *
+                  (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                      ? 1.20
+                      : 1.0),
+            ),
+            swapCategoryAndBottomBar: false,
+            skinToneConfig: const SkinToneConfig(),
+            categoryViewConfig: const CategoryViewConfig(),
+            bottomActionBarConfig: const BottomActionBarConfig(),
+            searchViewConfig: const SearchViewConfig(),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -50,6 +98,31 @@ class _AddSectionPageState extends State<AddSectionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            Row(
+              children: [
+                Text("Icon:"),
+                if (icon != null) Text(icon!.emoji),
+                Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                    onPressed: () {
+                      // showCupertinoModalPopup(context: context, builder: builder)
+                      // how do I hide this modal programmatically?
+                      showCupertinoModalPopup(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return emojiPicker(context);
+                        },
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.emoji_emotions,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             TextFormField(
               controller: nameController,
               decoration: InputDecoration(labelText: 'Name', enabled: !saving),

@@ -124,12 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
           label: Text('Add Section'),
         ),
         // code to insert more NavigationRailDestination from sections  list
-        ...sections
-            .map((section) => NavigationRailDestination(
-                  icon: Icon(Icons.category),
-                  label: Text(section),
-                ))
-            .toList(),
+        ...sections.map((section) => NavigationRailDestination(
+              icon: Icon(Icons.category),
+              label: Text(section),
+            )),
       ],
       selectedIndex: selectedIndex,
       onDestinationSelected: (value) {
