@@ -66,14 +66,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget buildPage(BuildContext context, List<String> sections) {
     Widget page;
 
-    var lastIndex = sections.length + 1;
+    var lastIndex = sections.length + 2;
     switch (selectedIndex) {
       case 0:
         page = GeneratorPage();
       case 1:
         page = FavoritesPage();
       default:
-        if (selectedIndex == lastIndex + 1) {
+        if (selectedIndex == lastIndex) {
           page = AddSectionPage();
         } else {
           page = SelectedSection(sectionName: selectedSection);
@@ -134,7 +134,13 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           selectedIndex = value;
           if (selectedIndex > 1) {
-            selectedSection = sections[selectedIndex - 2];
+            var sectionIndex = selectedIndex - 2;
+            if (sectionIndex >= sections.length) {
+              // the user clicked on the last nav element, 'Add Section'
+              selectedSection = "";
+            } else {
+              selectedSection = sections[selectedIndex - 2];
+            }
           }
         });
       },
