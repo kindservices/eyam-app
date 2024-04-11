@@ -11,7 +11,6 @@ class Init {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
 
-    print("kDebugMode is $kDebugMode");
     if (kDebugMode) {
       // Point Firestore to the Firestore emulator
       FirebaseFirestore.instance.settings = const Settings(

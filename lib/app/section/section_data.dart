@@ -27,4 +27,9 @@ class SectionData {
       position: data['position'],
     );
   }
+
+  @override
+  String toString() {
+    return 'SectionData(name: $name, iconCodePoint: $iconCodePoint, position: $position)';
+  }
 }

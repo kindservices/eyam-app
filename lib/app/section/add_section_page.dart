@@ -20,13 +20,17 @@ class _AddSectionPageState extends State<AddSectionPage> {
   bool saving = false;
   bool _emojiShowing = false;
 
-  IconData? selectedIcon = Icons.star;
+  IconData? selectedIcon;
 
   @override
   void dispose() {
     _nameController.dispose();
     _focus.dispose();
     super.dispose();
+  }
+
+  void onCancel(BuildContext context) {
+    MyAppState.forContext(context).unsetSection();
   }
 
   void onAddSection(BuildContext context) async {
@@ -54,7 +58,7 @@ class _AddSectionPageState extends State<AddSectionPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please correct errors')),
+        SnackBar(content: Text('Please correct the errors')),
       );
     }
   }
@@ -68,22 +72,20 @@ class _AddSectionPageState extends State<AddSectionPage> {
         child: Align(
           alignment: Alignment.topLeft,
           child: SingleChildScrollView(
-            child: Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  sectionNameField(),
-                  SizedBox(height: 10),
-                  iconField(),
-                  SizedBox(height: 18),
-                  emojiPicker(),
-                  SizedBox(height: 18),
-                  visibilityField(),
-                  SizedBox(height: 18),
-                  formButtons(context)
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                sectionNameField(),
+                SizedBox(height: 10),
+                iconField(),
+                SizedBox(height: 18),
+                emojiPicker(),
+                SizedBox(height: 18),
+                visibilityField(),
+                SizedBox(height: 18),
+                formButtons(context)
+              ],
             ),
           ),
         ),
@@ -196,12 +198,7 @@ class _AddSectionPageState extends State<AddSectionPage> {
           ),
           SizedBox(width: 8),
           ElevatedButton(
-            onPressed: saving
-                ? null
-                : () {
-                    // Add your own cancel functionality
-                    Navigator.of(context).pop();
-                  },
+            onPressed: saving ? null : () => onCancel(context),
             child: Text('Cancel'),
           ),
         ],

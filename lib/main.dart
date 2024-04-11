@@ -50,7 +50,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    var st8 = Provider.of<MyAppState>(context, listen: false);
+    var st8 = MyAppState.forContext(context);
+
+    selectedSection = st8.currentSection?.name ?? "";
 
     Section.getVisibleSections()
         .then((value) => st8.updateSections(value.toList()));
@@ -59,6 +61,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+
+    // if the 'Add Section' has updated the current section, then it will disagree
+    // with the selectedSection state variable, so we need to reset it
+    if (selectedSection != (appState.currentSection?.name ?? "")) {
+      selectedSection = appState.currentSection?.name ?? "";
+      if (selectedSection != "") {
+        selectedIndex = appState.sections
+            .indexWhere((element) => element.name == selectedSection);
+      } else {
+        selectedIndex = 0;
+      }
+    }
 
     return buildPage(context, appState.sections);
   }
@@ -141,6 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
             } else {
               selectedSection = sections[selectedIndex - 2].name;
             }
+            MyAppState.forContext(context).setSection(selectedSection);
           }
         });
       },
