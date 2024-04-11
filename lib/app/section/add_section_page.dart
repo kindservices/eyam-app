@@ -1,10 +1,14 @@
 import 'package:eyam_app/app/section/section.dart';
+import 'package:eyam_app/my_app_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:provider/provider.dart';
+
+import '../../main.dart';
 
 class AddSectionPage extends StatefulWidget {
   @override
@@ -23,17 +27,22 @@ class _AddSectionPageState extends State<AddSectionPage> {
     super.dispose();
   }
 
-  void _saveData() async {
+  void onAddSection(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         saving = true;
       });
 
-      await Section.save(nameController.text, _visibility);
+      await Section.addSection(nameController.text, _visibility);
 
       setState(() {
         saving = false; // Stop saving
       });
+      var st8 = Provider.of<MyAppState>(context, listen: false);
+
+      Section.getVisibleSections()
+          .then((value) => st8.updateSections(value.toList()));
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Created ${nameController.text}')),
       );
@@ -95,7 +104,7 @@ class _AddSectionPageState extends State<AddSectionPage> {
               child: Row(
                 children: [
                   ElevatedButton(
-                    onPressed: saving ? null : _saveData,
+                    onPressed: saving ? null : () => onAddSection(context),
                     child: Text('Save'),
                   ),
                   SizedBox(width: 8),

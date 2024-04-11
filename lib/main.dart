@@ -5,6 +5,7 @@ import 'package:eyam_app/app/section/section_page.dart';
 import 'package:eyam_app/app_state.dart';
 import 'package:eyam_app/generator_page.dart';
 import 'package:eyam_app/init.dart';
+import 'package:eyam_app/my_app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -36,25 +37,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  var favorites = <WordPair>[];
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
-    } else {
-      favorites.add(current);
-    }
-    notifyListeners();
-  }
-}
-
 class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -65,36 +47,48 @@ class _MyHomePageState extends State<MyHomePage> {
   var selectedSection = "";
 
   @override
+  void initState() {
+    super.initState();
+
+    var st8 = Provider.of<MyAppState>(context, listen: false);
+
+    Section.getVisibleSections()
+        .then((value) => st8.updateSections(value.toList()));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return buildPage(context, appState.sections);
+  }
+
+  Widget buildPage(BuildContext context, List<String> sections) {
     Widget page;
+
+    var lastIndex = sections.length + 1;
     switch (selectedIndex) {
       case 0:
         page = GeneratorPage();
       case 1:
         page = FavoritesPage();
-      case 2:
-        page = AddSectionPage();
       default:
-        page = SelectedSection(sectionName: selectedSection);
+        if (selectedIndex == lastIndex + 1) {
+          page = AddSectionPage();
+        } else {
+          page = SelectedSection(sectionName: selectedSection);
+        }
     }
 
+    return mainPage(sections, page);
+  }
+
+  LayoutBuilder mainPage(List<String> sections, Widget page) {
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         body: Row(
           children: [
-            SafeArea(
-                child: FutureBuilder(
-              future: Section.getVisibleSections(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Show loading indicator while waiting for data
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return navigationRail(constraints, snapshot.data!.toList());
-                }
-              },
-            )),
+            SafeArea(child: navigationRail(constraints, sections)),
             Expanded(
               child: Container(
                   color: Theme.of(context).colorScheme.primaryContainer,
@@ -108,6 +102,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   NavigationRail navigationRail(
       BoxConstraints constraints, List<String> sections) {
+    var safeIndex = selectedIndex;
+    var maxIndex = 2 + sections.length;
+    if (selectedIndex > maxIndex) {
+      print("WTF? ${selectedIndex} w/ maxIndex ${maxIndex} for ${sections}");
+      safeIndex = maxIndex - 1;
+    }
     return NavigationRail(
       extended: constraints.maxWidth >= 600,
       destinations: [
@@ -119,22 +119,22 @@ class _MyHomePageState extends State<MyHomePage> {
           icon: Icon(Icons.favorite),
           label: Text('Favorites'),
         ),
-        NavigationRailDestination(
-          icon: Icon(Icons.add_circle),
-          label: Text('Add Section'),
-        ),
         // code to insert more NavigationRailDestination from sections  list
         ...sections.map((section) => NavigationRailDestination(
               icon: Icon(Icons.category),
               label: Text(section),
             )),
+        NavigationRailDestination(
+          icon: Icon(Icons.add_circle),
+          label: Text('Add Section'),
+        )
       ],
-      selectedIndex: selectedIndex,
+      selectedIndex: safeIndex,
       onDestinationSelected: (value) {
         setState(() {
           selectedIndex = value;
-          if (selectedIndex > 2) {
-            selectedSection = sections[selectedIndex - 3];
+          if (selectedIndex > 1) {
+            selectedSection = sections[selectedIndex - 2];
           }
         });
       },

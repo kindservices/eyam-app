@@ -5,7 +5,7 @@ class Section {
     return FirebaseFirestore.instance.collection('sections');
   }
 
-  static save(String name, String visibility) async {
+  static addSection(String name, String visibility) async {
     CollectionReference<Map<String, dynamic>> coll = await sections();
     await coll.add({
       'name': name,
