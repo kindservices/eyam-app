@@ -1,5 +1,6 @@
 import 'package:eyam_app/app/section/add_section_page.dart';
 import 'package:eyam_app/app/section/section.dart';
+import 'package:eyam_app/app/section/section_data.dart';
 import 'package:eyam_app/app/section/section_page.dart';
 import 'package:eyam_app/app_state.dart';
 import 'package:eyam_app/generator_page.dart';
@@ -62,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return buildPage(context, appState.sections);
   }
 
-  Widget buildPage(BuildContext context, List<String> sections) {
+  Widget buildPage(BuildContext context, List<SectionData> sections) {
     Widget page;
 
     var lastIndex = sections.length + 2;
@@ -82,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return mainPage(sections, page);
   }
 
-  LayoutBuilder mainPage(List<String> sections, Widget page) {
+  LayoutBuilder mainPage(List<SectionData> sections, Widget page) {
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         body: Row(
@@ -100,11 +101,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   NavigationRail navigationRail(
-      BoxConstraints constraints, List<String> sections) {
+      BoxConstraints constraints, List<SectionData> sections) {
     var safeIndex = selectedIndex;
     var maxIndex = 2 + sections.length;
     if (selectedIndex > maxIndex) {
-      print("WTF? ${selectedIndex} w/ maxIndex ${maxIndex} for ${sections}");
+      print("WTF? $selectedIndex w/ maxIndex $maxIndex for $sections");
       safeIndex = maxIndex - 1;
     }
     return NavigationRail(
@@ -120,8 +121,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         // code to insert more NavigationRailDestination from sections  list
         ...sections.map((section) => NavigationRailDestination(
-              icon: Icon(Icons.category),
-              label: Text(section),
+              icon: section.icon(),
+              label: Text(section.name),
             )),
         NavigationRailDestination(
           icon: Icon(Icons.add_circle),
@@ -138,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
               // the user clicked on the last nav element, 'Add Section'
               selectedSection = "";
             } else {
-              selectedSection = sections[selectedIndex - 2];
+              selectedSection = sections[selectedIndex - 2].name;
             }
           }
         });

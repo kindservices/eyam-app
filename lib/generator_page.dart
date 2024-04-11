@@ -1,5 +1,4 @@
 import 'package:eyam_app/big_card.dart';
-import 'package:eyam_app/main.dart';
 import 'package:eyam_app/my_app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

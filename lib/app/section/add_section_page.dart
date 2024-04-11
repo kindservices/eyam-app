@@ -20,6 +20,8 @@ class _AddSectionPageState extends State<AddSectionPage> {
   bool saving = false;
   bool _emojiShowing = false;
 
+  IconData? selectedIcon = Icons.star;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -33,7 +35,11 @@ class _AddSectionPageState extends State<AddSectionPage> {
         saving = true;
       });
 
-      await Section.addSection(_nameController.text, _visibility);
+      // TODO - this is a race-condition hack
+      var pos = Provider.of<MyAppState>(context, listen: false).sections.length;
+
+      await Section.addSection(
+          _nameController.text, _visibility, selectedIcon?.codePoint ?? 0, pos);
 
       setState(() {
         saving = false; // Stop saving
@@ -59,67 +65,96 @@ class _AddSectionPageState extends State<AddSectionPage> {
       padding: const EdgeInsets.all(18.0),
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            sectionNameField(),
-            emojiPicker(),
-            visibilityField(),
-            formButtons(context),
-          ],
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SingleChildScrollView(
+            child: Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  sectionNameField(),
+                  SizedBox(height: 10),
+                  iconField(),
+                  SizedBox(height: 18),
+                  emojiPicker(),
+                  SizedBox(height: 18),
+                  visibilityField(),
+                  SizedBox(height: 18),
+                  formButtons(context)
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Row sectionNameField() {
-    return Row(
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: IconButton(
+  DropdownButtonFormField<IconData> iconField() {
+    return DropdownButtonFormField<IconData>(
+      decoration: InputDecoration(
+          labelText: 'Icon', // Label added here
+          border: OutlineInputBorder(),
+          enabled: !saving),
+      value: selectedIcon,
+      hint: Text('Select an Icon'),
+      onChanged: (newValue) {
+        setState(() {
+          selectedIcon = newValue;
+        });
+      },
+      items: Section.availableIcons
+          .map<DropdownMenuItem<IconData>>((IconData value) {
+        return DropdownMenuItem<IconData>(
+          value: value,
+          child: Icon(value),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget sectionNameField() {
+    return TextFormField(
+      controller: _nameController,
+      scrollController: _scrollController,
+      focusNode: _focus,
+      decoration: InputDecoration(
+          prefixIcon: IconButton(
+            icon: Icon(Icons.emoji_objects_outlined),
             onPressed: () {
               setState(() {
                 _emojiShowing = !_emojiShowing;
               });
             },
-            icon: const Icon(
-              Icons.emoji_emotions,
-              color: Colors.white,
-            ),
           ),
-        ),
-        Expanded(
-          child: TextFormField(
-            controller: _nameController,
-            scrollController: _scrollController,
-            focusNode: _focus,
-            decoration: InputDecoration(labelText: 'Name', enabled: !saving),
-            maxLength: 50,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a section name';
-              } else {
-                var trimmed = value.trim();
-                if (trimmed.length < 3) {
-                  return 'The name "${trimmed}" must be more than 3 characters and less than 50';
-                } else if (trimmed.length > 50) {
-                  return 'The name "${trimmed}" must be less than 50 characters';
-                }
-              }
-              return null;
-            },
-          ),
-        ),
-      ],
+          labelText: 'Name',
+          border: OutlineInputBorder(),
+          enabled: !saving),
+      maxLength: 50,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter a section name';
+        } else {
+          var trimmed = value.trim();
+          if (trimmed.length < 3) {
+            return 'The name "${trimmed}" must be more than 3 characters and less than 50';
+          } else if (trimmed.length > 50) {
+            return 'The name "${trimmed}" must be less than 50 characters';
+          }
+        }
+        return null;
+      },
     );
   }
 
   void _moveFocus() {
+    setState(() {
+      _emojiShowing = !_emojiShowing;
+      _nameController.selection =
+          TextSelection.collapsed(offset: _nameController.text.length);
+    });
     _focus.requestFocus();
-
-    _nameController.selection =
-        TextSelection.collapsed(offset: _nameController.text.length);
   }
 
   Offstage emojiPicker() {
@@ -174,27 +209,27 @@ class _AddSectionPageState extends State<AddSectionPage> {
     );
   }
 
-  Padding visibilityField() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(32.0, 0, 0, 0),
-      child: DropdownButtonFormField(
-        value: _visibility,
-        decoration: InputDecoration(labelText: 'Visibility', enabled: !saving),
-        items: <String>['public', 'default', 'private']
-            .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: saving
-            ? null
-            : (String? newValue) {
-                setState(() {
-                  _visibility = newValue!;
-                });
-              },
-      ),
+  Widget visibilityField() {
+    return DropdownButtonFormField(
+      value: _visibility,
+      decoration: InputDecoration(
+          labelText: 'Visibility',
+          border: OutlineInputBorder(),
+          enabled: !saving),
+      items: <String>['public', 'default', 'private']
+          .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+      onChanged: saving
+          ? null
+          : (String? newValue) {
+              setState(() {
+                _visibility = newValue!;
+              });
+            },
     );
   }
 }
