@@ -1,14 +1,10 @@
 import 'package:eyam_app/app/section/section.dart';
 import 'package:eyam_app/my_app_state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:provider/provider.dart';
-
-import '../../main.dart';
 
 class AddSectionPage extends StatefulWidget {
   @override
@@ -119,13 +115,20 @@ class _AddSectionPageState extends State<AddSectionPage> {
     );
   }
 
+  void _moveFocus() {
+    _focus.requestFocus();
+
+    _nameController.selection =
+        TextSelection.collapsed(offset: _nameController.text.length);
+  }
+
   Offstage emojiPicker() {
     return Offstage(
       offstage: !_emojiShowing,
       child: EmojiPicker(
         textEditingController: _nameController,
         scrollController: _scrollController,
-        onEmojiSelected: (category, emoji) => _focus.requestFocus(),
+        onEmojiSelected: (category, emoji) => _moveFocus(),
         config: Config(
           height: 256,
           checkPlatformCompatibility: true,
@@ -139,7 +142,8 @@ class _AddSectionPageState extends State<AddSectionPage> {
           swapCategoryAndBottomBar: false,
           skinToneConfig: const SkinToneConfig(),
           categoryViewConfig: const CategoryViewConfig(),
-          bottomActionBarConfig: const BottomActionBarConfig(),
+          bottomActionBarConfig:
+              const BottomActionBarConfig(showBackspaceButton: false),
           searchViewConfig: const SearchViewConfig(),
         ),
       ),
